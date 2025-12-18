@@ -51,4 +51,12 @@ public class User extends Timestamped {
     public void updateRole(UserRole userRole) {
         this.userRole = userRole;
     }
+
+    public UserRole getRole() {
+        return this.userRole = userRole;
+    }
+
+    public String getNickname() {
+        return this.nickname;
+    }
 }

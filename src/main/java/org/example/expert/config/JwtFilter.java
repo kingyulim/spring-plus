@@ -11,9 +11,17 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.expert.domain.user.enums.UserRole;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 
+@Component
 @Slf4j
 @RequiredArgsConstructor
 public class JwtFilter implements Filter {
@@ -55,12 +63,39 @@ public class JwtFilter implements Filter {
                 return;
             }
 
+            /*
             UserRole userRole = UserRole.valueOf(claims.get("userRole", String.class));
 
             httpRequest.setAttribute("userId", Long.parseLong(claims.getSubject()));
             httpRequest.setAttribute("email", claims.get("email"));
             httpRequest.setAttribute("nickname", claims.get("nickname"));
-            httpRequest.setAttribute("userRole", claims.get("userRole"));
+            httpRequest.setAttribute("userRole", claims.get("userRole"));*/
+
+            Long userId = Long.parseLong(claims.getSubject()); // JWT의 subject(subject = 사용자 고유 식별자, 여기서는 userId)를 Long 타입으로 변환
+            String email = claims.get("email", String.class); // JWT Claim에 저장된 사용자 이메일 조회
+            String nickname = claims.get("nickname", String.class); // JWT Claim에 저장된 사용자 닉네임 조회
+
+            // JWT Claim에 저장된 권한 문자열을 UserRole enum으로 변환
+            // 잘못된 값이 들어올 경우 InvalidRequestException 발생
+            UserRole userRole = UserRole.valueOf(claims.get("userRole", String.class));
+
+            // Spring Security가 인식할 수 있도록 GrantedAuthority 형태로 권한 생성
+            // 예) "USER" 또는 "ADMIN"
+            Set<GrantedAuthority> authorities = Set.of(new SimpleGrantedAuthority(userRole.getRole()));
+
+            // 인증된 사용자 정보를 담는 CustomSecurityUser 객체 생성
+            // 이 객체는 이후 SecurityContext를 통해 전역적으로 사용됨
+            CustomSecurityUser customSecurityUser = new CustomSecurityUser(userId, email, nickname, authorities);
+
+            // SecurityContext에 인증 정보(Authentication)를 저장
+            // 이 시점 이후부터 해당 요청은 인증된 사용자로 인식됨
+            SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken(
+                            customSecurityUser, // 인증된 사용자 정보 (Principal)
+                            null, // 비밀번호는 JWT 인증이므로 null
+                            customSecurityUser.getAuthorities() // 사용자 권한 정보
+                    )
+            );
 
             if (url.startsWith("/admin")) {
                 // 관리자 권한이 없는 경우 403을 반환합니다.

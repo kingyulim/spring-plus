@@ -26,10 +26,13 @@ public class DataInitializer implements CommandLineRunner {
 
         // 유저 없으면 생성
         if (userRepository.count() == 0) {
-            User u1 = new User("user1@test.com", passwordEncoder.encode("1234"), "테스트닉네임1", UserRole.USER);
-            User u2 = new User("user2@test.com", passwordEncoder.encode("1234"), "테스트닉네임2", UserRole.USER);
+            List<User> users = List.of(
+                new User("admin@test.com", passwordEncoder.encode("1234"), "관리자", UserRole.ADMIN),
+                new User("user1@test.com", passwordEncoder.encode("1234"), "테스트닉네임1", UserRole.USER),
+                new User("user2@test.com", passwordEncoder.encode("1234"), "테스트닉네임2", UserRole.USER)
+            );
 
-            userRepository.saveAll(List.of(u1, u2));
+            userRepository.saveAll(users);
         }
 
 

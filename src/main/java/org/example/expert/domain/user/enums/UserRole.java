@@ -13,4 +13,8 @@ public enum UserRole {
                 .findFirst()
                 .orElseThrow(() -> new InvalidRequestException("유효하지 않은 UerRole"));
     }
+
+    public String getRole() {
+        return this.name();
+    }
 }

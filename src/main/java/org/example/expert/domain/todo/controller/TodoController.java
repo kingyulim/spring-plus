@@ -11,8 +11,10 @@ import org.example.expert.domain.todo.dto.response.TodoSaveResponse;
 import org.example.expert.domain.todo.dto.response.TodoSearchResponse;
 import org.example.expert.domain.todo.service.TodoService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -60,10 +62,11 @@ public class TodoController {
     /**
      * 일정 검색 요청 검증
      * @param request 검색 조건 파라미터
+     * @param pageable pageable 파라미터
      * @return TodoSearchResponse api json 반환
      */
     @GetMapping("/search")
-    public ResponseEntity<List<TodoSearchResponse>> todoSearch(TodoSearchRequest request) {
-        return ResponseEntity.ok(todoService.todoSearch(request));
+    public ResponseEntity<Page<TodoSearchResponse>> todoSearch(TodoSearchRequest request, Pageable pageable) {
+        return ResponseEntity.ok(todoService.todoSearch(request, pageable));
     }
 }

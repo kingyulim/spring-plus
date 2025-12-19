@@ -104,10 +104,11 @@ public class TodoService {
     /**
      * 일정 검색 비지니스 로직 처리 메서드
      * @param request 입력 조건 파라미터
+     * @param pageable pageable 파라미터
      * @return TodoSearchResponse api json 반환
      */
     @Transactional(readOnly = true)
-    public List<TodoSearchResponse> todoSearch(TodoSearchRequest request) {
-        return todoRepository.todoSearch(request);
+    public Page<TodoSearchResponse> todoSearch(TodoSearchRequest request, Pageable pageable) {
+        return todoRepository.todoSearch(request, pageable);
     }
 }

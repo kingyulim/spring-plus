@@ -1,13 +1,22 @@
 package org.example.expert.domain.todo.repository;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.example.expert.domain.comment.entity.QComment;
+import org.example.expert.domain.manager.entity.QManager;
+import org.example.expert.domain.todo.dto.request.TodoSearchRequest;
+import org.example.expert.domain.todo.dto.response.TodoSearchResponse;
 import org.example.expert.domain.todo.entity.QTodo;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.user.entity.QUser;
 
+import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @RequiredArgsConstructor
 public class TodoCustomRepositoryImpl implements TodoCustomRepository {
 
@@ -25,5 +34,51 @@ public class TodoCustomRepositoryImpl implements TodoCustomRepository {
                 .fetchOne();
 
         return Optional.ofNullable(result);
+    }
+
+    /**
+     * 일정 검색 필터링 queryDSL
+     * @param request 검색 파라미터
+     * @return TodoSearchResponse api json 반환
+     */
+    @Override
+    public List<TodoSearchResponse> todoSearch(TodoSearchRequest request) {
+        QTodo todo = QTodo.todo;
+        QUser user = QUser.user;
+        QManager manager = QManager.manager;
+        QComment comment = QComment.comment;
+
+        BooleanBuilder builder = new BooleanBuilder();
+
+        // 제목 검색
+        if (request.getTitle() != null && !request.getTitle().isBlank()) {
+            builder.and(todo.title.contains(request.getTitle()));
+        }
+
+        // 생성 날짜 기준 검색
+        if (request.getCreateAt() != null) {
+            builder.and(todo.createdAt.goe(request.getCreateAt().atStartOfDay()));
+        }
+
+        // 닉네임 검색
+        if (request.getNickName() != null && !request.getNickName().isBlank()) {
+            builder.and(user.nickname.contains(request.getNickName()));
+        }
+
+        return jpaQueryFactory
+                .select(Projections.constructor(
+                        TodoSearchResponse.class,
+                        todo.title,
+                        comment.id.countDistinct(),
+                        manager.id.countDistinct()
+                ))
+                .from(todo)
+                .leftJoin(todo.comments, comment)
+                .leftJoin(todo.managers, manager)
+                .leftJoin(todo.user, user)
+                .where(builder)
+                .groupBy(todo.id)
+                .orderBy(todo.createdAt.desc())
+                .fetch();
     }
 }

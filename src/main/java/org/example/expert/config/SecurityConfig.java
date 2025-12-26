@@ -26,8 +26,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtFilter, SecurityContextHolderAwareRequestFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        // 회원가입, 로그인은 누구나 접근 가능
-                        .requestMatchers(HttpMethod.POST, "/auth/signup", "/auth/signin").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/signup", "/auth/signin").permitAll() // 회원가입, 로그인은 누구나 접근 가능
                         .anyRequest().authenticated() // 나머지는 로그인한 사용자만 접근 가능
                 )
                 .build();

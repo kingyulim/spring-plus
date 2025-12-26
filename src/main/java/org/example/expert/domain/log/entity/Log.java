@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.expert.domain.common.entity.Timestamped;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "log")
-public class Log {
+public class Log extends Timestamped {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,5 +28,13 @@ public class Log {
     private boolean success;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime logDatetime;
+
+    public Log(String action, String message, boolean success) {
+        this.action = action;
+        this.message = message;
+        this.success = success;
+
+        this.logDatetime = LocalDateTime.now();
+    }
 }

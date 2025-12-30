@@ -29,9 +29,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/auth/signup",
-                                "/auth/signin",
-                                "/health/check"
+                                "/auth/signin"
                         ).permitAll()
+                        .requestMatchers("/health/check").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated() // 나머지는 로그인한 사용자만 접근 가능
                 )

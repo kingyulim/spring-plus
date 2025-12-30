@@ -1,7 +1,5 @@
 # SPRING PLUS
 
----
-
 # 필수기능
 __Level.1__
 1. 코드 개선 퀴즈 - @Transactional의 이해
